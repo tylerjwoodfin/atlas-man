@@ -4,7 +4,7 @@ This module provides functions to interact with the Trello API.
 
 import argparse
 from trello import TrelloClient
-from config import load_config
+from atlasman.config import load_config
 
 def initialize_trello_client() -> TrelloClient:
     """

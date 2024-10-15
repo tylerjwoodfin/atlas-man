@@ -4,7 +4,7 @@ AtlasMan CLI - A Command Line Interface to manage Trello and Jira projects.
 
 import argparse
 from typing import Tuple, List
-from config import load_config
+from atlasman.config import load_config
 from atlasman.trello_commands import handle_trello_commands
 
 def add_trello_arguments(parser: argparse.ArgumentParser) -> None:
