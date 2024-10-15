@@ -1,6 +1,8 @@
 # atlas-man
 A CLI to manage Trello and Jira projects.
 
+This project is in very early stages of development. The current version is a proof of concept and may not be fully functional. Please use with caution.
+
 ## Overview
 `atlas-man` is a command-line interface (CLI) tool for managing tasks and projects in Trello and Jira. It allows you to interact with both platforms directly from your terminal, enabling streamlined project management without needing to open a web browser.
 

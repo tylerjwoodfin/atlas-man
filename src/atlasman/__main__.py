@@ -4,6 +4,8 @@ AtlasMan CLI - A Command Line Interface to manage Trello and Jira projects.
 
 import argparse
 from typing import Tuple, List
+from config import load_config
+from atlasman.trello_commands import handle_trello_commands
 
 def add_trello_arguments(parser: argparse.ArgumentParser) -> None:
     """
@@ -195,34 +197,6 @@ def validate_arguments(args: argparse.Namespace,
         return args, remaining_args
 
 
-def handle_trello_commands(args: argparse.Namespace) -> None:
-    """
-    Handle Trello-specific commands based on parsed arguments.
-
-    Args:
-        args (argparse.Namespace): Parsed command-line arguments.
-    """
-    print("Trello")
-    if args.boards:
-        print("Listing all Trello boards...")
-    elif args.lists:
-        print("Listing all Trello lists...")
-    elif args.cards:
-        print("Listing all Trello cards...")
-    elif args.add_board:
-        print(f"Creating a new Trello board named {args.add_board}...")
-    elif args.add_list:
-        print(f"Creating a new list named {args.add_list[1]} in board {args.add_list[0]}...")
-    elif args.add_card:
-        print(f"Creating a new card named {args.add_card[1]} in list {args.add_card[0]}...")
-    elif args.delete_board:
-        print(f"Deleting Trello board named {args.delete_board}...")
-    elif args.delete_list:
-        print(f"Deleting list named {args.delete_list[1]} from board {args.delete_list[0]}...")
-    elif args.delete_card:
-        print(f"Deleting card named {args.delete_card[1]} from list {args.delete_card[0]}...")
-
-
 def handle_jira_commands(args: argparse.Namespace) -> None:
     """
     Handle Jira-specific commands based on parsed arguments.
@@ -268,9 +242,17 @@ def main() -> None:
         if not validated_args or unknown_args:
             parser.print_help()
 
+        # Load configuration and pass necessary values to command handlers
+        config = load_config()
+        cli_config = config.get("cli", {})
+
+        # Set verbosity if specified in config
+        verbose = cli_config.get("verbose", False)
+        if verbose:
+            print("Running in verbose mode...")
+
     except KeyboardInterrupt:
         print("\nOperation cancelled by the user.")
-
 
 if __name__ == "__main__":
     main()
