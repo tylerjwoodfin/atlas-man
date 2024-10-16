@@ -1,10 +1,10 @@
 """
-AtlasMan CLI - A Command Line Interface to manage Trello and Jira projects.
+Atlas-Man CLI - A Command Line Interface to manage Trello and Jira projects.
 """
 
 import argparse
 from typing import Tuple, List
-from atlasman.config import load_config
+from atlasman.config import edit_config, load_config
 from atlasman.trello_commands import TrelloCommands
 
 def add_trello_arguments(parser: argparse.ArgumentParser) -> None:
@@ -137,7 +137,7 @@ def add_jira_arguments(parser: argparse.ArgumentParser) -> None:
 
 def parse_arguments() -> argparse.Namespace:
     """
-    Parse command-line arguments for AtlasMan.
+    Add command-line arguments for Atlas-Man.
 
     Returns:
         argparse.Namespace: Parsed command-line arguments.
@@ -193,6 +193,12 @@ def validate_arguments(args: argparse.Namespace,
         handle_jira_commands(jira_args)
         return jira_args, []
 
+    elif args.config:
+        # Edit the configuration file in the default editor
+        edit_config()
+
+        return args, remaining_args
+
     else:
         print("Error: No valid command context provided.")
         return args, remaining_args
@@ -232,6 +238,9 @@ def main() -> None:
         parser = argparse.ArgumentParser(description="A CLI to manage Trello and Jira projects")
         parser.add_argument("--trello", "--t", help="Use Trello commands", action="store_true")
         parser.add_argument("--jira", "--j", help="Use Jira commands", action="store_true")
+        parser.add_argument("--config",
+                            help="Edit the configuration file in the default editor",
+                            action="store_true")
 
         # Parse initial command context
         args, remaining_args = parser.parse_known_args()
