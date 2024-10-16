@@ -37,6 +37,12 @@ DEFAULT_CONFIG = {
     }
 }
 
+def edit_config() -> None:
+    """
+    Open the configuration file in the default editor for manual editing.
+    """
+    os.system(f"{os.getenv('EDITOR', 'vi')} {CONFIG_FILE}")
+
 def load_config() -> Dict[str, Any]:
     """
     Load the configuration file. If the file does not exist, create it with default values.
