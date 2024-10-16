@@ -4,6 +4,8 @@ AtlasMan CLI - A Command Line Interface to manage Trello and Jira projects.
 
 import argparse
 from typing import Tuple, List
+from atlasman.config import load_config
+from atlasman.trello_commands import TrelloCommands
 
 def add_trello_arguments(parser: argparse.ArgumentParser) -> None:
     """
@@ -150,7 +152,8 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def validate_arguments(args: argparse.Namespace,
-                       remaining_args: List[str]) -> Tuple[argparse.Namespace, List[str]]:
+                       remaining_args: List[str],
+                       trello_commands: TrelloCommands) -> Tuple[argparse.Namespace, List[str]]:
     """
     Validate arguments based on Trello or Jira context and return parsed arguments and any unknowns.
 
@@ -173,7 +176,7 @@ def validate_arguments(args: argparse.Namespace,
             trello_parser.print_help()
             return trello_args, unknown
 
-        handle_trello_commands(trello_args)
+        trello_commands.handle_trello_commands(trello_args)
         return trello_args, []
 
     elif args.jira:
@@ -193,34 +196,6 @@ def validate_arguments(args: argparse.Namespace,
     else:
         print("Error: No valid command context provided.")
         return args, remaining_args
-
-
-def handle_trello_commands(args: argparse.Namespace) -> None:
-    """
-    Handle Trello-specific commands based on parsed arguments.
-
-    Args:
-        args (argparse.Namespace): Parsed command-line arguments.
-    """
-    print("Trello")
-    if args.boards:
-        print("Listing all Trello boards...")
-    elif args.lists:
-        print("Listing all Trello lists...")
-    elif args.cards:
-        print("Listing all Trello cards...")
-    elif args.add_board:
-        print(f"Creating a new Trello board named {args.add_board}...")
-    elif args.add_list:
-        print(f"Creating a new list named {args.add_list[1]} in board {args.add_list[0]}...")
-    elif args.add_card:
-        print(f"Creating a new card named {args.add_card[1]} in list {args.add_card[0]}...")
-    elif args.delete_board:
-        print(f"Deleting Trello board named {args.delete_board}...")
-    elif args.delete_list:
-        print(f"Deleting list named {args.delete_list[1]} from board {args.delete_list[0]}...")
-    elif args.delete_card:
-        print(f"Deleting card named {args.delete_card[1]} from list {args.delete_card[0]}...")
 
 
 def handle_jira_commands(args: argparse.Namespace) -> None:
@@ -261,8 +236,20 @@ def main() -> None:
         # Parse initial command context
         args, remaining_args = parser.parse_known_args()
 
+        # Load configuration and pass necessary values to command handlers
+        config = load_config()
+        cli_config = config.get("cli", {})
+
+        # Set verbosity if specified in config
+        verbose = cli_config.get("verbose", False)
+        if verbose:
+            print("Running in verbose mode...")
+
+        # Initialize TrelloCommands and JiraCommands
+        trello_commands = TrelloCommands(config)
+
         # Validate arguments based on context and handle commands
-        validated_args, unknown_args = validate_arguments(args, remaining_args)
+        validated_args, unknown_args = validate_arguments(args, remaining_args, trello_commands)
 
         # If no valid command context provided and no unknown arguments, show the main help
         if not validated_args or unknown_args:
@@ -270,7 +257,6 @@ def main() -> None:
 
     except KeyboardInterrupt:
         print("\nOperation cancelled by the user.")
-
 
 if __name__ == "__main__":
     main()

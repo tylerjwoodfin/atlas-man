@@ -1,6 +1,8 @@
 # atlas-man
 A CLI to manage Trello and Jira projects.
 
+This project is in very early stages of development. The current version is a proof of concept and may not be fully functional. Please use with caution.
+
 ## Overview
 `atlas-man` is a command-line interface (CLI) tool for managing tasks and projects in Trello and Jira. It allows you to interact with both platforms directly from your terminal, enabling streamlined project management without needing to open a web browser.
 
@@ -28,6 +30,42 @@ source env/bin/activate
 `atlas-man` requires some Python dependencies. Install them with:
 ```bash
 pip install -r requirements.md
+```
+
+## Configuration
+Before using `atlas-man`, you need to populate the `config.json` file with your Trello and Jira API keys.
+
+### Trello Configuration
+- Visit the [Trello Power-Ups Admin](https://trello.com/power-ups/admin/) page and create a new Power-Up.
+
+```
+New Power-Up Name: atlas-man <or anything else>
+Workspace: <choose a workspace>
+Iframe connector URL: <leave blank>
+Email: <your email>
+Support Contact: <your email>
+Name: <your name>
+```
+
+- Once the Power-Up is created, go to the API Keys tab and `Generate a new API Key`.
+- Copy the API Key and secret, then paste it into the `config.json` file under the `trello` section.
+- Run
+```
+export TRELLO_API_KEY=<your API key>
+export TRELLO_API_SECRET=<your API secret>
+```
+- Run `python3 -m trello oauth`. Visit the link and enter the verification code to generate an OAuth token and token secret.
+- Copy the token and paste it into the `config.json` file under the `trello` section.
+- Your config.json should look like this:
+```json
+{
+  "trello": {
+    "api_key": "<your API key>",
+    "api_secret": "<your API secret>",
+    "oauth_token": "<your OAuth token>",
+    "oauth_token_secret": "<your OAuth token secret>"
+  },
+}
 ```
 
 ## Usage
@@ -141,10 +179,10 @@ We welcome contributions! Please fork the repository, make your changes, and sub
 3. Test thoroughly before submitting your pull request.
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/tylerjwoodfin/atlas-man/blob/main/LICENSE) file for more information.
 
 ## Contact
+This project was developed by [Tyler Woodfin](https://www.tyler.cloud/).
 For any inquiries or issues, please open an issue on [GitHub](https://github.com/tylerjwoodfin/atlas-man/issues).
 
 Happy tasking!
-```
