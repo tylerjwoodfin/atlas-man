@@ -18,7 +18,9 @@ CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
 DEFAULT_CONFIG = {
     "trello": {
         "api_key": "",
-        "api_token": "",
+        "api_secret": "",
+        "oauth_token": "",
+        "oauth_token_secret": "",
         "default_board": "",
         "default_list": ""
     },
@@ -43,6 +45,7 @@ def load_config() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: A dictionary with configuration settings.
     """
+
     if not os.path.exists(CONFIG_FILE):
         print(f"Configuration file not found. Creating a new one at {CONFIG_FILE}.")
         save_config(DEFAULT_CONFIG)
@@ -87,6 +90,7 @@ def _update_with_defaults(config: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: The updated configuration dictionary with default values filled in.
     """
+
     updated_config = DEFAULT_CONFIG.copy()
     for section, defaults in DEFAULT_CONFIG.items():
         if section in config:
@@ -99,7 +103,9 @@ def _update_with_defaults(config: Dict[str, Any]) -> Dict[str, Any]:
         else:
             print(f"Warning: Missing configuration section '{section}', adding default.")
     updated_config.update(config)
-    save_config(updated_config)
+
+    if updated_config != config:
+        save_config(updated_config)
     return updated_config
 
 def get_config_value(section: str, key: str) -> Optional[Any]:

@@ -32,6 +32,42 @@ source env/bin/activate
 pip install -r requirements.md
 ```
 
+## Configuration
+Before using `atlas-man`, you need to populate the `config.json` file with your Trello and Jira API keys.
+
+### Trello Configuration
+- Visit the [Trello Power-Ups Admin](https://trello.com/power-ups/admin/) page and create a new Power-Up.
+
+```
+New Power-Up Name: atlas-man <or anything else>
+Workspace: <choose a workspace>
+Iframe connector URL: <leave blank>
+Email: <your email>
+Support Contact: <your email>
+Name: <your name>
+```
+
+- Once the Power-Up is created, go to the API Keys tab and `Generate a new API Key`.
+- Copy the API Key and secret, then paste it into the `config.json` file under the `trello` section.
+- Run
+```
+export TRELLO_API_KEY=<your API key>
+export TRELLO_API_SECRET=<your API secret>
+```
+- Run `python3 -m trello oauth`. Visit the link and enter the verification code to generate an OAuth token and token secret.
+- Copy the token and paste it into the `config.json` file under the `trello` section.
+- Your config.json should look like this:
+```json
+{
+  "trello": {
+    "api_key": "<your API key>",
+    "api_secret": "<your API secret>",
+    "oauth_token": "<your OAuth token>",
+    "oauth_token_secret": "<your OAuth token secret>"
+  },
+}
+```
+
 ## Usage
 Run the CLI by executing the `main` script with the appropriate commands for Trello or Jira. You can access detailed help with the `--help` flag.
 
@@ -143,10 +179,10 @@ We welcome contributions! Please fork the repository, make your changes, and sub
 3. Test thoroughly before submitting your pull request.
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/tylerjwoodfin/atlas-man/blob/main/LICENSE) file for more information.
 
 ## Contact
+This project was developed by [Tyler Woodfin](https://www.tyler.cloud/).
 For any inquiries or issues, please open an issue on [GitHub](https://github.com/tylerjwoodfin/atlas-man/issues).
 
 Happy tasking!
-```

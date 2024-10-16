@@ -5,7 +5,7 @@ AtlasMan CLI - A Command Line Interface to manage Trello and Jira projects.
 import argparse
 from typing import Tuple, List
 from atlasman.config import load_config
-from atlasman.trello_commands import handle_trello_commands
+from atlasman.trello_commands import TrelloCommands
 
 def add_trello_arguments(parser: argparse.ArgumentParser) -> None:
     """
@@ -152,7 +152,8 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def validate_arguments(args: argparse.Namespace,
-                       remaining_args: List[str]) -> Tuple[argparse.Namespace, List[str]]:
+                       remaining_args: List[str],
+                       trello_commands: TrelloCommands) -> Tuple[argparse.Namespace, List[str]]:
     """
     Validate arguments based on Trello or Jira context and return parsed arguments and any unknowns.
 
@@ -175,7 +176,7 @@ def validate_arguments(args: argparse.Namespace,
             trello_parser.print_help()
             return trello_args, unknown
 
-        handle_trello_commands(trello_args)
+        trello_commands.handle_trello_commands(trello_args)
         return trello_args, []
 
     elif args.jira:
@@ -235,13 +236,6 @@ def main() -> None:
         # Parse initial command context
         args, remaining_args = parser.parse_known_args()
 
-        # Validate arguments based on context and handle commands
-        validated_args, unknown_args = validate_arguments(args, remaining_args)
-
-        # If no valid command context provided and no unknown arguments, show the main help
-        if not validated_args or unknown_args:
-            parser.print_help()
-
         # Load configuration and pass necessary values to command handlers
         config = load_config()
         cli_config = config.get("cli", {})
@@ -250,6 +244,16 @@ def main() -> None:
         verbose = cli_config.get("verbose", False)
         if verbose:
             print("Running in verbose mode...")
+
+        # Initialize TrelloCommands and JiraCommands
+        trello_commands = TrelloCommands(config)
+
+        # Validate arguments based on context and handle commands
+        validated_args, unknown_args = validate_arguments(args, remaining_args, trello_commands)
+
+        # If no valid command context provided and no unknown arguments, show the main help
+        if not validated_args or unknown_args:
+            parser.print_help()
 
     except KeyboardInterrupt:
         print("\nOperation cancelled by the user.")
