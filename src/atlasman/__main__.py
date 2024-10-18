@@ -31,13 +31,15 @@ def add_trello_arguments(parser: argparse.ArgumentParser) -> None:
     )
     trello_actions.add_argument(
         "--lists",
-        action="store_true",
-        help="List all Trello lists"
+        metavar="BOARD_NAME",
+        type=str,
+        help="List all Trello lists for a specified board"
     )
     trello_actions.add_argument(
         "--cards",
-        action="store_true",
-        help="List all Trello cards"
+        metavar="LIST_ID",
+        type=str,
+        help="List all cards for a specified list by list ID"
     )
     trello_actions.add_argument(
         "--add-board",

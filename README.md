@@ -63,7 +63,18 @@ export TRELLO_API_SECRET=<your API secret>
     "api_key": "<your API key>",
     "api_secret": "<your API secret>",
     "oauth_token": "<your OAuth token>",
-    "oauth_token_secret": "<your OAuth token secret>"
+    "oauth_token_secret": "<your OAuth token secret>",
+    "alias_ids": { // optional
+        "shopping": {
+          "board_id": "",
+          "list_id": ""
+        },
+        "todo": {
+          "board_id": "",
+          "list_id": ""
+        }
+        // add more aliases as needed
+    }
   },
 }
 ```
