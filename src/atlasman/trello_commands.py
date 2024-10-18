@@ -132,35 +132,51 @@ class TrelloCommands:
         for card in cards:
             print(f"Card Name: {card.name} - Card ID: {card.id}")
 
-    def add_card(self, list_name: str, card_name: str, description: str = "") -> None:
+    def add_card(self, list_name_or_alias: str, card_name: str, description: str = "") -> None:
         """
-        Adds a new card to a specified list in the default board.
+        Adds a new card to a specified list.
+        Can use list name or alias from the configuration.
 
         Args:
-            list_name (str): The name of the list to add the card to.
+            list_name_or_alias (str): The name of the list or an alias.
             card_name (str): The name of the card to create.
             description (str): The description for the card.
         """
+        # Check if alias exists in config
+        alias_info = self.config["trello"].get("alias_ids", {}).get(list_name_or_alias)
 
-        default_board_id = self.config["trello"].get("default_board_id")
+        if alias_info:
+            list_id = alias_info.get("list_id")
+            if not list_id:
+                print(f"Error: Alias '{list_name_or_alias}' does not contain a list ID.")
+                return
+            list_obj = self.client.get_list(list_id)
+        else:
+            # Fallback to treating it as a list name or ID
+            try:
+                list_obj = self.client.get_list(list_name_or_alias)
+            except TokenError as e:
+                print(f"Token error fetching list with ID or name '{list_name_or_alias}': {e}")
+            except ValueError as e:
+                print(f"Value error fetching list with ID or name '{list_name_or_alias}': {e}")
+            except Exception as e: # pylint: disable=broad-except
+                print(f"Unexpected error fetching list with ID or name '{list_name_or_alias}': {e}")
+                return
 
-        if not default_board_id:
-            print("Error: No default board specified in the configuration file.")
+        if not list_obj:
+            print(f"No list found with the ID or alias '{list_name_or_alias}'.")
             return
 
-        boards = self.client.list_boards() or []
-        board = next((b for b in boards if b.name == default_board_id), None)
-        if not board:
-            print(f"No board found with the ID '{default_board_id}'.")
-            return
-
-        trello_list = next((l for l in board.list_lists() if l.name == list_name), None)
-        if not trello_list:
-            print(f"No list found with the name '{list_name}' in board '{default_board_id}'.")
-            return
-
-        trello_list.add_card(card_name, desc=description)
-        print(f"Card '{card_name}' added to list '{list_name}' in board '{default_board_id}'.")
+        # Add the card to the specified list
+        try:
+            list_obj.add_card(card_name, desc=description)
+            print(f"Card '{card_name}' added to list '{list_obj.name}'.")
+        except TokenError as e:
+            print(f"Token error adding card '{card_name}' to list: {e}")
+        except ValueError as e:
+            print(f"Value error adding card '{card_name}' to list: {e}")
+        except Exception as e: # pylint: disable=broad-except
+            print(f"Unexpected error adding card '{card_name}' to list: {e}")
 
     def handle_trello_commands(self, args: argparse.Namespace) -> None:
         """
@@ -178,5 +194,9 @@ class TrelloCommands:
             self.list_cards(args.cards)
         elif args.add_card:
             self.add_card(args.add_card[0], args.add_card[1])
-        else:
-            print("No valid Trello command provided.")
+        elif args.delete_card:
+            print("Unimplemented: Delete card")
+        elif args.delete_list:
+            print("Unimplemented: Delete list")
+        elif args.delete_board:
+            print("Unimplemented: Delete board")

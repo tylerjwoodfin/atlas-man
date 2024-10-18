@@ -1,7 +1,38 @@
 # atlas-man
 A CLI to manage Trello and Jira projects.
 
-This project is in very early stages of development. The current version is a proof of concept and may not be fully functional. Please use with caution.
+This project is in very early, but very active stages of development.
+
+## Development Status
+- Trello:
+  - ✅ List boards
+  - ✅ List lists
+  - ✅ List cards
+  - 🔄 Add board
+  - 🔄 Add list
+  - ✅ Add card
+  - 🔄 Update board
+  - 🔄 Update list
+  - 🔄 Update card
+  - 🔄 Delete board
+  - 🔄 Delete list
+  - 🔄 Delete card
+- Jira:
+  - List issues
+  - List projects
+  - Add issue
+  - Add project
+  - Update issue
+  - Delete issue
+  - Delete project
+- General:
+  - TUI (prompt_toolkit) to select boards, lists, cards, etc.
+  - ✅ Config file to store API keys and other settings
+  - ✅ Alias support for boards, lists, cards, etc.
+  - Integration with [Cabinet](https://www.github.com/tylerjwoodfin/cabinet)
+- Future:
+  - Confluence integration
+  - Bitbucket integration
 
 ## Overview
 `atlas-man` is a command-line interface (CLI) tool for managing tasks and projects in Trello and Jira. It allows you to interact with both platforms directly from your terminal, enabling streamlined project management without needing to open a web browser.
