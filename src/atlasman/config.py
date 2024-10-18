@@ -21,8 +21,16 @@ DEFAULT_CONFIG = {
         "api_secret": "",
         "oauth_token": "",
         "oauth_token_secret": "",
-        "default_board": "",
-        "default_list": ""
+        "alias_ids": {
+            "shopping": {
+                "board_id": "",
+                "list_id": ""
+            },
+            "todo": {
+                "board_id": "",
+                "list_id": ""
+            }
+        }
     },
     "jira": {
         "api_token": "",
