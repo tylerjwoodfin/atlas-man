@@ -278,15 +278,17 @@ def main() -> None:
         trello_commands = TrelloCommands(config)
 
         # Validate arguments based on context and handle commands
-        validated_args, unknown_args = validate_arguments(args, remaining_args, trello_commands)
+        validated_args = validate_arguments(args, remaining_args, trello_commands)
 
-        if not validated_args and not unknown_args:
+        if not validated_args:
             parser.print_help()
-        elif unknown_args:
-            print(f"Warning: Unrecognized arguments: {' '.join(unknown_args)}")
 
     except (argparse.ArgumentError, TypeError) as e:
-        print(f"Error: {str(e)}")
+        print(f"Parsing Error: {str(e)}")
+        if args.trello:
+            print("Please check the Trello-specific syntax in README.md.\n")
+        elif args.jira:
+            print("Please check the Jira-specific syntax in README.md.\n")
         parser.print_help()
     except Exception as e: # pylint: disable=broad-except
         print(f"An unexpected error occurred: {str(e)}")
