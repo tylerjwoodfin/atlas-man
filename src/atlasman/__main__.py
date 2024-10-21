@@ -60,6 +60,24 @@ def add_trello_arguments(parser: argparse.ArgumentParser) -> None:
         help="Create a new Trello card in a specified list"
     )
     trello_actions.add_argument(
+        "--update-board",
+        metavar=("BOARD_ID", "NEW_NAME"),
+        nargs=2,
+        help="Update a Trello board"
+    )
+    trello_actions.add_argument(
+        "--update-list",
+        metavar=("LIST_ID", "NEW_NAME"),
+        nargs=2,
+        help="Update a Trello list"
+    )
+    trello_actions.add_argument(
+        "--update-card",
+        metavar=("CARD_ID", "NEW_NAME", "[DESCRIPTION]"),
+        nargs='+',
+        help="Update a Trello card. DESCRIPTION is optional."
+    )
+    trello_actions.add_argument(
         "--delete-board",
         metavar="BOARD_NAME",
         type=str,
@@ -67,14 +85,14 @@ def add_trello_arguments(parser: argparse.ArgumentParser) -> None:
     )
     trello_actions.add_argument(
         "--delete-list",
-        metavar=("BOARD_NAME", "LIST_NAME"),
-        nargs=2,
+        metavar="LIST_NAME",
+        type=str,
         help="Delete a Trello list from a specified board"
     )
     trello_actions.add_argument(
         "--delete-card",
-        metavar=("LIST_NAME", "CARD_NAME"),
-        nargs=2,
+        metavar="CARD_NAME",
+        type=str,
         help="Delete a Trello card from a specified list"
     )
 
@@ -152,10 +170,9 @@ def parse_arguments() -> argparse.Namespace:
 
     return parser.parse_args()
 
-
 def validate_arguments(args: argparse.Namespace,
-                       remaining_args: List[str],
-                       trello_commands: TrelloCommands) -> Tuple[argparse.Namespace, List[str]]:
+                    remaining_args: List[str],
+                    trello_commands: TrelloCommands) -> Tuple[argparse.Namespace, List[str]]:
     """
     Validate arguments based on Trello or Jira context and return parsed arguments and any unknowns.
 
@@ -171,15 +188,18 @@ def validate_arguments(args: argparse.Namespace,
         # Parse Trello-specific commands
         trello_parser = argparse.ArgumentParser(description="Trello-specific commands")
         add_trello_arguments(trello_parser)
-        trello_args, unknown = trello_parser.parse_known_args(remaining_args)
+        try:
+            trello_args, unknown = trello_parser.parse_known_args(remaining_args)
+        except argparse.ArgumentError as e:
+            print(f"Error: {str(e)}")
+            trello_parser.print_help()
+            return args, []
 
         if unknown:
-            print(f"Error: Unrecognized arguments for Trello: {' '.join(unknown)}")
-            trello_parser.print_help()
-            return trello_args, unknown
+            print(f"Warning: Unrecognized arguments for Trello: {' '.join(unknown)}")
 
         trello_commands.handle_trello_commands(trello_args)
-        return trello_args, []
+        return trello_args, unknown
 
     elif args.jira:
         # Parse Jira-specific commands
@@ -240,9 +260,7 @@ def main() -> None:
         parser = argparse.ArgumentParser(description="A CLI to manage Trello and Jira projects")
         parser.add_argument("--trello", "--t", help="Use Trello commands", action="store_true")
         parser.add_argument("--jira", "--j", help="Use Jira commands", action="store_true")
-        parser.add_argument("--config",
-                            help="Edit the configuration file in the default editor",
-                            action="store_true")
+        parser.add_argument("--config", help="Edit the configuration file", action="store_true")
 
         # Parse initial command context
         args, remaining_args = parser.parse_known_args()
@@ -260,12 +278,20 @@ def main() -> None:
         trello_commands = TrelloCommands(config)
 
         # Validate arguments based on context and handle commands
-        validated_args, unknown_args = validate_arguments(args, remaining_args, trello_commands)
+        validated_args = validate_arguments(args, remaining_args, trello_commands)
 
-        # If no valid command context provided and no unknown arguments, show the main help
-        if not validated_args or unknown_args:
+        if not validated_args:
             parser.print_help()
 
+    except (argparse.ArgumentError, TypeError) as e:
+        print(f"Parsing Error: {str(e)}")
+        if args.trello:
+            print("Please check the Trello-specific syntax in README.md.\n")
+        elif args.jira:
+            print("Please check the Jira-specific syntax in README.md.\n")
+        parser.print_help()
+    except Exception as e: # pylint: disable=broad-except
+        print(f"An unexpected error occurred: {str(e)}")
     except KeyboardInterrupt:
         print("\nOperation cancelled by the user.")
 

@@ -8,15 +8,15 @@ This project is in very early, but very active stages of development.
   - ✅ List boards
   - ✅ List lists
   - ✅ List cards
-  - 🔄 Add board
-  - 🔄 Add list
+  - ✅ Add board
+  - ✅ Add list
   - ✅ Add card
-  - 🔄 Update board
-  - 🔄 Update list
-  - 🔄 Update card
-  - 🔄 Delete board
-  - 🔄 Delete list
-  - 🔄 Delete card
+  - ✅ Update board
+  - ✅ Update list
+  - ✅ Update card
+  - ✅ Delete board
+  - ✅ Delete list
+  - ✅ Delete card
 - Jira:
   - List issues
   - List projects
@@ -29,7 +29,10 @@ This project is in very early, but very active stages of development.
   - TUI (prompt_toolkit) to select boards, lists, cards, etc.
   - ✅ Config file to store API keys and other settings
   - ✅ Alias support for boards, lists, cards, etc.
+  - Trello-specific and Jira-specific help text
+  - Update README.md with specific examples
   - Integration with [Cabinet](https://www.github.com/tylerjwoodfin/cabinet)
+  - Full test coverage
 - Future:
   - Confluence integration
   - Bitbucket integration
@@ -139,25 +142,25 @@ python atlas-man.py --help
   ```
 - **Add a new Trello list to an existing board**:
   ```bash
-  python atlas-man.py --trello --add-list "Board Name" "List Name"
+  python atlas-man.py --trello --add-list "Board ID" "List ID"
   ```
 - **Add a new Trello card to an existing list**:
   ```bash
-  python atlas-man.py --trello --add-card "List Name" "Card Name"
+  python atlas-man.py --trello --add-card "List ID" "Card Title"
   ```
 
 #### Delete Commands
 - **Delete a Trello board**:
   ```bash
-  python atlas-man.py --trello --delete-board "Board Name"
+  python atlas-man.py --trello --delete-board "Board ID"
   ```
 - **Delete a Trello list from a board**:
   ```bash
-  python atlas-man.py --trello --delete-list "Board Name" "List Name"
+  python atlas-man.py --trello --delete-list "List ID"
   ```
 - **Delete a Trello card from a list**:
   ```bash
-  python atlas-man.py --trello --delete-card "List Name" "Card Name"
+  python atlas-man.py --trello --delete-card "Card ID"
   ```
 
 ### Jira Commands
