@@ -65,6 +65,15 @@ class JiraCommands:
         return JIRA(server=base_url, basic_auth=(username, api_token))
 
     @handle_jira_exceptions
+    def list_projects(self) -> None:
+        """
+        Lists all projects available in Jira.
+        """
+        projects = self.client.projects()
+        for project in projects:
+            print(f"Project Name: {project.name} - Project Key: {project.key}")
+
+    @handle_jira_exceptions
     def list_issues(self, project_key: str) -> None:
         """
         Lists all issues for a specified project.
@@ -91,13 +100,81 @@ class JiraCommands:
             print("Unexpected issue format received from Jira API.")
 
     @handle_jira_exceptions
-    def list_projects(self) -> None:
+    def add_project(self, project_name: str, project_key: str) -> None:
         """
-        Lists all projects available in Jira.
+        Creates a new project with the specified name and key,
+        allowing the user to choose a project type.
+        
+        Args:
+            project_name (str): The name of the project to create.
+            project_key (str): The key for the project to create.
         """
-        projects = self.client.projects()
-        for project in projects:
-            print(f"Project Name: {project.name} - Project Key: {project.key}")
+        # Prompt the user for project type
+        project_type = input(
+            "Select the type of project to create:\n"
+            "(k) Kanban\n"
+            "(s) Simplified project management\n"
+            "(c) Scrum\n"
+            "(b) Bug tracking\n"
+            "Enter your choice (k/s/c/b): "
+        ).strip().lower()
+
+        # Determine the project template key based on user input
+        if project_type == 'k':
+            project_template_key = "com.pyxis.greenhopper.jira:gh-simplified-agility-kanban"
+        elif project_type == 's':
+            project_template_key = \
+                "com.atlassian.jira-core-project-templates:jira-core-simplified-project-management"
+        elif project_type == 'c':
+            project_template_key = "com.pyxis.greenhopper.jira:gh-simplified-agility-scrum"
+        elif project_type == 'b':
+            project_template_key = \
+                "com.atlassian.jira.jira-software-project-templates:jira-software-bug-tracking"
+        else:
+            print("Error: Invalid choice. Please enter 'k', 's', 'c', or 'b'.")
+            return
+
+        # Attempt to create the project with the selected template
+        try:
+            # Create the project and retrieve the project ID
+            project_id = self.client.create_project(
+                key=project_key,
+                name=project_name,
+                template_name=project_template_key,
+            )
+
+            if not project_id:
+                print("Error: Project creation failed.")
+                return
+
+            # Safely access base URL
+            base_url = self.config.get('jira', {}).get('base_url', "")
+            if base_url:
+                # Fetch the board associated with the new project
+                boards = self.client.boards(projectKeyOrID=project_key)
+                if boards:
+                    # Assuming we take the first board if multiple are returned
+                    board_id = boards[0].id
+                    project_link = \
+                        f"{base_url}/jira/software/projects/{project_key}/boards/{board_id}"
+                    print(f"Project '{project_name}' created successfully with Key: {project_key}")
+                    print(f"Project link: {project_link}")
+                else:
+                    print(f"Project '{project_name}' created successfully with Key: {project_key}")
+                    print("Warning: No boards found for this project.")
+            else:
+                print(f"Project '{project_name}' created successfully with Key: {project_key}")
+                print("Warning: Base URL is missing in the configuration,",
+                      "so the project link could not be generated.")
+
+        except JIRAError as e:
+            if e.status_code == 400 and "issue security scheme" in e.text:
+                print("Error: Unable to retrieve issue security scheme.",
+                      "Please check your Jira configuration.")
+            elif e.status_code == 403:
+                print("Error: You do not have the required admin privileges to create projects.")
+            else:
+                raise  # Reraise other errors for the decorator to handle
 
     @handle_jira_exceptions
     def add_issue(self, project_key: str, issue_title: str) -> None:
@@ -136,27 +213,6 @@ class JiraCommands:
         issue = self.client.issue(issue_id)
         issue.delete()
         print(f"Issue '{issue_id}' deleted successfully.")
-
-    @handle_jira_exceptions
-    def add_project(self, project_name: str, project_key: str) -> None:
-        """
-        Creates a new project with the specified name and key.
-        
-        Args:
-            project_name (str): The name of the project to create.
-            project_key (str): The key for the project to create.
-        """
-        try:
-            new_project = self.client.create_project(
-                key=project_key,
-                name=project_name,
-            )
-            print(f"Project '{project_name}' created successfully with Key: {new_project.key}")
-        except JIRAError as e:
-            if e.status_code == 403:
-                print("Error: You do not have the required admin privileges to create projects.")
-            else:
-                raise  # Reraise other errors for the decorator to handle
 
     @handle_jira_exceptions
     def delete_project(self, project_key: str) -> None:

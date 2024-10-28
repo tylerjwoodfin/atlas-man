@@ -20,11 +20,13 @@ This project is in very early, but very active stages of development.
 - Jira:
   - ✅ List issues
     - options for filtering by project, status, etc.
-  - List projects
+  - ✅ List projects
   - ✅ Add issue (default: task)
     - CLI and TUI options for issue type, priority, etc.
-  - Add project
+  - ✅ Add project
   - Update issue
+  - Update project
+    - title
   - Delete issue
   - Delete project
 - General:
