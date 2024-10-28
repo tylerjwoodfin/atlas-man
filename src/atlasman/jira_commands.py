@@ -205,14 +205,47 @@ class JiraCommands:
     @handle_jira_exceptions
     def delete_issue(self, issue_id: str) -> None:
         """
-        Deletes an issue by its ID.
+        Deletes an issue by its ID or numeric identifier, with a confirmation prompt requiring
+        the user to re-enter the exact issue key.
 
         Args:
-            issue_id (str): The ID of the issue to delete.
+            issue_id (str): The ID or numeric part of the issue to delete.
         """
-        issue = self.client.issue(issue_id)
-        issue.delete()
-        print(f"Issue '{issue_id}' deleted successfully.")
+        try:
+            # Normalize issue ID to handle either full key (e.g., 'ANT-123')
+            # or numeric part (e.g., '123')
+            if '-' not in issue_id:
+                # Assume it's only the numeric part and prepend the project key, if needed
+                project_key = self.config["jira"].get("default_project_key")
+                issue_id = f"{project_key}-{issue_id}"
+
+            # Fetch the issue using the normalized issue key
+            issue = self.client.issue(issue_id)
+            issue_key = issue.key  # Full issue key, e.g., 'ANT-123'
+            issue_title = issue.fields.summary  # Get the issue title for context
+
+            # Display warning and request exact confirmation
+            print(f"Warning: You are about to delete the issue '{issue_title}' (Key: {issue_key}).")
+            confirmation_text = ("This action is irreversible.\n"
+                                 f"To confirm deletion, please enter the issue key '{issue_key}': ")
+            confirmation = input(confirmation_text).strip()
+
+            # Check if the entered key matches exactly
+            if confirmation != issue_key:
+                print("Deletion cancelled: Issue key did not match exactly.")
+                return
+
+            # Proceed with deletion if confirmed
+            issue.delete()
+            print(f"Issue '{issue_key}' deleted successfully.")
+
+        except JIRAError as e:
+            if e.status_code == 403:
+                print("Error: You do not have the required permissions to delete this issue.")
+            elif e.status_code == 404:
+                print(f"Error: Issue '{issue_id}' not found.")
+            else:
+                raise  # Reraise other errors for the decorator to handle
 
     @handle_jira_exceptions
     def delete_project(self, project_key: str) -> None:
