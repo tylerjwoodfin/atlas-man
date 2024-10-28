@@ -28,7 +28,7 @@ This project is in very early, but very active stages of development.
   - Update project
     - title
   - Delete issue
-  - Delete project
+  - ✅ Delete project
 - General:
   - TUI (prompt_toolkit) to select boards, lists, cards, etc.
   - ✅ Config file to store API keys and other settings

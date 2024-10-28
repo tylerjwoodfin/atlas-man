@@ -217,15 +217,33 @@ class JiraCommands:
     @handle_jira_exceptions
     def delete_project(self, project_key: str) -> None:
         """
-        Deletes a project by its key.
+        Deletes a project by its key, with a confirmation prompt
+        requiring the user to enter the project title.
 
         Args:
             project_key (str): The key of the project to delete.
         """
         try:
+            # Fetch the project using the project key
             project = self.client.project(project_key)
+            project_name = project.name  # Get the project title for confirmation
+
+            # Display warning and request confirmation
+            print("Warning: You are about to delete the project",
+                  f"'{project_name}' (Key: {project_key}).")
+            warning_text = ("This action is dangerous.\n"
+                            f"To confirm deletion, please enter the title '{project_name}': ")
+            confirmation = input(warning_text).strip()
+
+            # Check if the entered title matches (case-insensitive)
+            if confirmation.lower() != project_name.lower():
+                print("Deletion cancelled: Project title did not match.")
+                return
+
+            # Proceed with deletion if confirmed
             project.delete()
             print(f"Project '{project_key}' deleted successfully.")
+
         except JIRAError as e:
             if e.status_code == 403:
                 print("Error: You do not have the required admin privileges to delete projects.")
