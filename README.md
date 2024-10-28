@@ -18,16 +18,18 @@ This project is in very early, but very active stages of development.
   - ✅ Delete list
   - ✅ Delete card
 - Jira:
-  - ✅ List issues
+  - List issues
+    - ✅ all issues
     - options for filtering by project, status, etc.
   - ✅ List projects
-  - ✅ Add issue (default: task)
-    - CLI and TUI options for issue type, priority, etc.
+  - Add issue (default: task)
+    - ✅ Add task (default option)
+    - options for issue type, priority, etc.
   - ✅ Add project
   - Update issue
   - Update project
     - title
-  - Delete issue
+  - ✅ Delete issue
   - ✅ Delete project
 - General:
   - TUI (prompt_toolkit) to select boards, lists, cards, etc.
