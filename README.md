@@ -21,7 +21,8 @@ This project is in very early, but very active stages of development.
   - ✅ List issues
     - options for filtering by project, status, etc.
   - List projects
-  - Add issue
+  - ✅ Add issue (default: task)
+    - CLI and TUI options for issue type, priority, etc.
   - Add project
   - Update issue
   - Delete issue
@@ -183,6 +184,8 @@ python atlas-man.py --help
   ```bash
   python atlas-man.py --jira --add-issue "Project Key" "Issue Title"
   ```
+  Currently, the issue type is hardcoded to "Task" and the priority is hardcoded to "Medium". Future versions will allow you to specify these values.
+
 - **Add a new Jira project**:
   ```bash
   python atlas-man.py --jira --add-project "Project Name"

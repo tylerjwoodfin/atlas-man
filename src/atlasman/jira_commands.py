@@ -110,7 +110,7 @@ class JiraCommands:
         """
         new_issue = self.client.create_issue(project=project_key,
                                              summary=issue_title, issuetype={'name': 'Task'})
-        print(f"Issue '{new_issue.key}' created successfully in project '{project_key}'.")
+        print(f"Task '{new_issue.key}' created successfully in project '{project_key}'.")
 
     @handle_jira_exceptions
     def update_issue(self, issue_id: str, new_title: str) -> None:
@@ -195,12 +195,31 @@ class JiraCommands:
             if project_key:
                 self.list_issues(project_key)
             else:
-                print("Error: No project key provided, ",
+                print("Error: No project key provided,",
                       "and no default project set in configuration.")
         elif args.projects:
             self.list_projects()
         elif args.add_issue:
-            self.add_issue(args.add_issue[0], args.add_issue[1])
+            # Check if one or two arguments were provided for --add-issue
+            if len(args.add_issue) == 1:
+                # Use default project and provided title
+                project_key = self.config["jira"].get("default_project_key")
+                issue_title = args.add_issue[0]
+            elif len(args.add_issue) == 2:
+                # Use provided project key and title
+                project_key = args.add_issue[0]
+                issue_title = args.add_issue[1]
+            else:
+                print("Error: --add-issue expects either 1 or 2 arguments.")
+                return
+
+            # Ensure project key is available before proceeding
+            if project_key:
+                self.add_issue(project_key, issue_title)
+            else:
+                print(args)
+                print("Error: No project key provided,",
+                      "and no default project set in configuration.")
         elif args.update_issue:
             self.update_issue(args.update_issue[0], args.update_issue[1])
         elif args.delete_issue:

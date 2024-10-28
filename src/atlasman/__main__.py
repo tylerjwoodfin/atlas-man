@@ -131,8 +131,8 @@ If no project is provided, uses default."
     jira_actions.add_argument(
         "--add-issue",
         metavar=("PROJECT_KEY", "ISSUE_TITLE"),
-        nargs=2,
-        help="Add a new Jira issue to a specified project"
+        nargs="+",
+        help="Add a new Jira issue."
     )
     jira_actions.add_argument(
         "--update-issue",
