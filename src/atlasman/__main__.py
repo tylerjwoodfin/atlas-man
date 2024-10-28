@@ -6,6 +6,7 @@ import argparse
 from typing import Tuple, List
 from atlasman.config import edit_config, load_config
 from atlasman.trello_commands import TrelloCommands
+from atlasman.jira_commands import JiraCommands
 
 def add_trello_arguments(parser: argparse.ArgumentParser) -> None:
     """
@@ -115,8 +116,12 @@ def add_jira_arguments(parser: argparse.ArgumentParser) -> None:
     jira_actions = parser.add_argument_group('Jira Actions')
     jira_actions.add_argument(
         "--issues",
-        action="store_true",
-        help="List all Jira issues"
+        metavar="PROJECT_KEY",
+        type=str,
+        nargs="?",
+        const="default",
+        help="List all Jira issues for a specified project. \
+If no project is provided, uses default."
     )
     jira_actions.add_argument(
         "--projects",
@@ -126,13 +131,14 @@ def add_jira_arguments(parser: argparse.ArgumentParser) -> None:
     jira_actions.add_argument(
         "--add-issue",
         metavar=("PROJECT_KEY", "ISSUE_TITLE"),
-        nargs=2,
-        help="Add a new Jira issue to a specified project"
+        nargs="+",
+        help="Add a new Jira issue."
     )
     jira_actions.add_argument(
         "--update-issue",
         metavar=("ISSUE_ID", "NEW_TITLE"),
         nargs=2,
+        type=str,
         help="Update an existing Jira issue"
     )
     jira_actions.add_argument(
@@ -143,7 +149,8 @@ def add_jira_arguments(parser: argparse.ArgumentParser) -> None:
     )
     jira_actions.add_argument(
         "--add-project",
-        metavar="PROJECT_NAME",
+        metavar=("PROJECT_NAME", "PROJECT_KEY"),
+        nargs=2,
         type=str,
         help="Create a new Jira project"
     )
@@ -172,7 +179,8 @@ def parse_arguments() -> argparse.Namespace:
 
 def validate_arguments(args: argparse.Namespace,
                     remaining_args: List[str],
-                    trello_commands: TrelloCommands) -> Tuple[argparse.Namespace, List[str]]:
+                    trello_commands: TrelloCommands,
+                    jira_commands: JiraCommands) -> Tuple[argparse.Namespace, List[str]]:
     """
     Validate arguments based on Trello or Jira context and return parsed arguments and any unknowns.
 
@@ -212,7 +220,7 @@ def validate_arguments(args: argparse.Namespace,
             jira_parser.print_help()
             return jira_args, unknown
 
-        handle_jira_commands(jira_args)
+        jira_commands.handle_jira_commands(jira_args)
         return jira_args, []
 
     elif args.config:
@@ -224,32 +232,6 @@ def validate_arguments(args: argparse.Namespace,
     else:
         print("Error: No valid command context provided.")
         return args, remaining_args
-
-
-def handle_jira_commands(args: argparse.Namespace) -> None:
-    """
-    Handle Jira-specific commands based on parsed arguments.
-
-    Args:
-        args (argparse.Namespace): Parsed command-line arguments.
-    """
-    print("Jira")
-    if args.issues:
-        print("Listing all Jira issues...")
-    elif args.projects:
-        print("Listing all Jira projects...")
-    elif args.add_issue:
-        print(
-            f"Adding a new issue titled '{args.add_issue[1]}' to project '{args.add_issue[0]}'...")
-    elif args.update_issue:
-        print(f"Updating issue '{args.update_issue[0]}' with new title '{args.update_issue[1]}'...")
-    elif args.delete_issue:
-        print(f"Deleting issue with ID '{args.delete_issue}'...")
-    elif args.add_project:
-        print(f"Creating a new Jira project named {args.add_project}...")
-    elif args.delete_project:
-        print(f"Deleting Jira project with key {args.delete_project}...")
-
 
 def main() -> None:
     """
@@ -276,9 +258,10 @@ def main() -> None:
 
         # Initialize TrelloCommands and JiraCommands
         trello_commands = TrelloCommands(config)
+        jira_commands = JiraCommands(config)
 
         # Validate arguments based on context and handle commands
-        validated_args = validate_arguments(args, remaining_args, trello_commands)
+        validated_args = validate_arguments(args, remaining_args, trello_commands, jira_commands)
 
         if not validated_args:
             parser.print_help()

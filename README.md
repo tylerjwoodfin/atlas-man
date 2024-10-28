@@ -19,12 +19,18 @@ This project is in very early, but very active stages of development.
   - ✅ Delete card
 - Jira:
   - List issues
-  - List projects
-  - Add issue
-  - Add project
+    - ✅ all issues
+    - options for filtering by project, status, etc.
+  - ✅ List projects
+  - Add issue (default: task)
+    - ✅ Add task (default option)
+    - options for issue type, priority, etc.
+  - ✅ Add project
   - Update issue
-  - Delete issue
-  - Delete project
+  - Update project
+    - title
+  - ✅ Delete issue
+  - ✅ Delete project
 - General:
   - TUI (prompt_toolkit) to select boards, lists, cards, etc.
   - ✅ Config file to store API keys and other settings
@@ -33,6 +39,9 @@ This project is in very early, but very active stages of development.
   - Update README.md with specific examples
   - Integration with [Cabinet](https://www.github.com/tylerjwoodfin/cabinet)
   - Full test coverage
+  - `verbose` support from config file
+  - `default_tool` support from config file
+  - `output_format` support from config file
 - Future:
   - Confluence integration
   - Bitbucket integration
@@ -179,6 +188,8 @@ python atlas-man.py --help
   ```bash
   python atlas-man.py --jira --add-issue "Project Key" "Issue Title"
   ```
+  Currently, the issue type is hardcoded to "Task" and the priority is hardcoded to "Medium". Future versions will allow you to specify these values.
+
 - **Add a new Jira project**:
   ```bash
   python atlas-man.py --jira --add-project "Project Name"
