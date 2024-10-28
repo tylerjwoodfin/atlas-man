@@ -18,7 +18,8 @@ This project is in very early, but very active stages of development.
   - ✅ Delete list
   - ✅ Delete card
 - Jira:
-  - List issues
+  - ✅ List issues
+    - options for filtering by project, status, etc.
   - List projects
   - Add issue
   - Add project
@@ -33,6 +34,9 @@ This project is in very early, but very active stages of development.
   - Update README.md with specific examples
   - Integration with [Cabinet](https://www.github.com/tylerjwoodfin/cabinet)
   - Full test coverage
+  - `verbose` support from config file
+  - `default_tool` support from config file
+  - `output_format` support from config file
 - Future:
   - Confluence integration
   - Bitbucket integration

@@ -36,7 +36,7 @@ DEFAULT_CONFIG = {
         "api_token": "",
         "base_url": "https://yourdomain.atlassian.net",
         "username": "",
-        "default_project": ""
+        "default_project_key": ""
     },
     "cli": {
         "verbose": False,
