@@ -36,7 +36,14 @@ DEFAULT_CONFIG = {
         "api_token": "",
         "base_url": "https://yourdomain.atlassian.net",
         "username": "",
-        "default_project_key": ""
+        "default_project_key": "",
+        "show_done_issues": False,
+        "custom_status_order": {
+            "To Do": 1,
+            "In Progress": 2,
+            "Testing": 3,
+            "Done": 4
+        }
     },
     "cli": {
         "verbose": False,

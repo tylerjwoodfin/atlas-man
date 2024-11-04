@@ -6,6 +6,7 @@ import argparse
 import traceback
 from typing import Any, Dict
 from jira import Issue, JIRA, JIRAError
+from tabulate import tabulate
 
 # Decorator to handle common Jira-related exceptions
 def handle_jira_exceptions(func):
@@ -76,7 +77,7 @@ class JiraCommands:
     @handle_jira_exceptions
     def list_issues(self, project_key: str) -> None:
         """
-        Lists all issues for a specified project.
+        Lists all issues for a specified project, sorted by status in a custom order.
 
         Args:
             project_key (str): The key of the project to list issues from.
@@ -85,13 +86,41 @@ class JiraCommands:
         print(f"Issues for {project_key}:")
         issues = self.client.search_issues(f'project="{project_key}"')
 
+        # Custom order for statuses
+        status_order = {
+            "To Do": 1,
+            "In Progress": 2,
+            "Testing": 3,
+            "Done": 4
+        }
+
         # Check if the response is a ResultList of Issue objects
         if isinstance(issues, list) or hasattr(issues, 'total'):
+            # Collect issues in a list with their statuses for sorting
+            issue_list = []
             for issue in issues:
                 if isinstance(issue, Issue):
-                    print(f"Issue Key: {issue.key} - Issue Summary: {issue.fields.summary}")
+                    if issue.fields.status.name == "Done" and \
+                        not self.config["jira"]["show_done_issues"]:
+                        continue
+                    # Assign a sort index; default to 0 if not in the custom order
+                    status_index = status_order.get(issue.fields.status.name, 0)
+                    issue_list.append((status_index, issue.fields.status.name,
+                                       issue.key, issue.fields.summary))
                 else:
                     print(f"Unexpected item type in issues list: {type(issue)}")
+
+            # Sort the issue list by the custom status index
+            issue_list.sort(key=lambda x: x[0])
+
+            # Create a table using tabulate
+            table = tabulate(
+                [(status, key, summary) for _, status, key, summary in issue_list],
+                headers=["Status", "Issue Key", "Summary"],
+                tablefmt="grid"
+            )
+            print(table)
+
         elif isinstance(issues, dict):
             print("Received response as dictionary. Inspecting keys for more details.")
             for key, value in issues.items():

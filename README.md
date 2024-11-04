@@ -35,13 +35,13 @@ This project is in very early, but very active stages of development.
   - TUI (prompt_toolkit) to select boards, lists, cards, etc.
   - ✅ Config file to store API keys and other settings
   - ✅ Alias support for boards, lists, cards, etc.
-  - Trello-specific and Jira-specific help text
-  - Update README.md with specific examples
+  - ✅ Trello-specific and Jira-specific help text
   - Integration with [Cabinet](https://www.github.com/tylerjwoodfin/cabinet)
   - Full test coverage
   - `verbose` support from config file
   - `default_tool` support from config file
   - `output_format` support from config file
+  - Export to CSV
 - Future:
   - Confluence integration
   - Bitbucket integration
@@ -99,7 +99,7 @@ export TRELLO_API_SECRET=<your API secret>
 ```
 - Run `python3 -m trello oauth`. Visit the link and enter the verification code to generate an OAuth token and token secret.
 - Copy the token and paste it into the `config.json` file under the `trello` section.
-- Your config.json should look like this:
+- Your config.json should look something like this:
 ```json
 {
   "trello": {
@@ -119,6 +119,30 @@ export TRELLO_API_SECRET=<your API secret>
         // add more aliases as needed
     }
   },
+}
+```
+
+### Jira Configuration
+
+- Visit the [Jira API Tokens](https://id.atlassian.com/manage-profile/security/api-tokens) page and create a new API token.
+- Copy the token and paste it into the `config.json` file under the `jira` section.
+- Fill out other fields in the `config.json` file as needed.
+- Your config.json should look like this:
+```json
+{
+  "jira": {
+        "api_token": "",
+        "base_url": "https://yourdomain.atlassian.net",
+        "username": "",
+        "default_project_key": "",
+        "show_done_issues": False,
+        "custom_status_order": { // optional
+            "To Do": 1,
+            "In Progress": 2,
+            "Testing": 3,
+            "Done": 4
+        }
+    },
 }
 ```
 
@@ -178,6 +202,10 @@ python atlas-man.py --help
   ```bash
   python atlas-man.py --jira --issues
   ```
+  - By default, this lists all issues not in the "Done" status.
+    - Configure this under `jira` -> `show_done_issues` in the `config.json` file.
+  - You can also configure the sort order under `jira` -> `custom_status_order` in the `config.json` file. See the example above. Add more statuses as needed.
+
 - **List all Jira projects**:
   ```bash
   python atlas-man.py --jira --projects
