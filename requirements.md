@@ -5,3 +5,4 @@ requests
 prompt_toolkit
 trello
 jira
+tabulate
