@@ -7,6 +7,7 @@ import traceback
 from typing import Any, Dict
 from jira import Issue, JIRA, JIRAError
 from tabulate import tabulate
+from .constants.jira_field_types import JIRA_FIELD_TYPES
 
 # Decorator to handle common Jira-related exceptions
 def handle_jira_exceptions(func):
@@ -205,18 +206,97 @@ class JiraCommands:
             else:
                 raise  # Reraise other errors for the decorator to handle
 
-    @handle_jira_exceptions
-    def add_issue(self, project_key: str, issue_title: str) -> None:
+    def add_issue(self, project_key: str, issue_title: str, issue_type: str = 'Task') -> None:
         """
         Adds a new issue to the specified project.
 
         Args:
             project_key (str): The key of the project where the issue will be added.
             issue_title (str): The title of the issue.
+            issue_type (str): The type of the issue, e.g., "Story", "Task".
         """
-        new_issue = self.client.create_issue(project=project_key,
-                                             summary=issue_title, issuetype={'name': 'Task'})
-        print(f"Task '{new_issue.key}' created successfully in project '{project_key}'.")
+
+        # Capitalize Issue Type
+        default_issue_type: str = self.config["jira"].get("default_issue_types")
+        if issue_type:
+            issue_type = issue_type.lower().capitalize()
+        elif default_issue_type:
+            issue_type = default_issue_type
+        else:
+            issue_type = input("Enter an issue type: ").lower().capitalize()
+
+        fields = {
+            'project': {'key': project_key},
+            'summary': issue_title,
+            'issuetype': {'name': issue_type}
+        }
+
+        def _parse_fields(errors):
+            """Handles required field errors by prompting the user for input."""
+
+            def _prompt_for_field(field, message):
+                """Prompts the user for a missing field based on its expected type."""
+                expected_type = JIRA_FIELD_TYPES.get(field, str)
+
+                # Prompt based on expected type
+                if expected_type == int:
+                    value = int(input(
+                        f"Enter a number for {message.replace(' is required.', '')}: "))
+                elif expected_type == list:
+                    value = input(
+                        f"Enter values for {message.replace(
+                            ' is required.', '')} (comma-separated): ")
+                    value = [item.strip() for item in value.split(',')]
+                elif expected_type == dict:
+                    if 'issuetype' in field:
+                        # Special handling for issuetype fields if needed
+                        value = input("Enter an issue type: ").lower().capitalize()
+                    elif 'customfield_' in field:
+                        data = self.client.createmeta(
+                            projectKeys=project_key,
+                            issuetypeNames=issue_type,
+                            expand='projects.issuetypes.fields'
+                        )
+                        allowed_values = None
+                        for project in data.get("projects", []):
+                            for issuetype in project.get("issuetypes", []):
+                                available_fields = issuetype.get("fields", {})
+                                if field in available_fields:
+                                    allowed_values = available_fields[field].get(
+                                        "allowedValues", [])
+                                    break  # Stop after finding the first instance
+
+                        # Print or further process the allowed values for customfield
+                        if allowed_values:
+                            print("Enter an ID from the following:")
+                            for option in allowed_values:
+                                print(f"{option['id']} - {option['value']}")
+                            value = {"id": input("\n")}
+                else:
+                    # Default case for str or any unexpected type
+                    value = input(f"Enter {message.replace(' is required.', '')}: ")
+
+                fields[field] = value
+
+            # Process each error field using _prompt_for_field
+            for field, message in errors.items():
+                _prompt_for_field(field, message)
+
+        try:
+            new_issue = self.client.create_issue(fields=fields)
+            print(f"{issue_type} '{new_issue.key}' created successfully in '{project_key}'.")
+            print(f"{self.config["jira"]["base_url"]}/browse/{new_issue.key}")
+        except JIRAError as e:
+            if e.status_code == 400:
+                errors = e.response.json().get('errors', {})
+                _parse_fields(errors)  # Call the inner function to handle field parsing
+
+                # Retry creating the issue with additional required fields
+                new_issue = self.client.create_issue(fields=fields)
+                print(f"{issue_type} '{new_issue.key}' created "
+                    f"successfully in project '{project_key}'.")
+            else:
+                print(f"Failed to create issue: {e}")
 
     @handle_jira_exceptions
     def update_issue(self, issue_id: str, new_title: str) -> None:
@@ -261,7 +341,7 @@ class JiraCommands:
 
             # Check if the entered key matches exactly
             if confirmation != issue_key:
-                print("Deletion cancelled: Issue key did not match exactly.")
+                print("Deletion canceled: Issue key did not match exactly.")
                 return
 
             # Proceed with deletion if confirmed
@@ -299,7 +379,7 @@ class JiraCommands:
 
             # Check if the entered title matches (case-insensitive)
             if confirmation.lower() != project_name.lower():
-                print("Deletion cancelled: Project title did not match.")
+                print("Deletion canceled: Project title did not match.")
                 return
 
             # Proceed with deletion if confirmed
@@ -341,19 +421,17 @@ class JiraCommands:
                 # Use default project and provided title
                 project_key = self.config["jira"].get("default_project_key")
                 issue_title = args.add_issue[0]
-            elif len(args.add_issue) == 2:
+            elif len(args.add_issue) < 3:
                 # Use provided project key and title
                 project_key = args.add_issue[0]
                 issue_title = args.add_issue[1]
             else:
-                print("Error: --add-issue expects either 1 or 2 arguments.")
-                return
+                raise TypeError("Invalid number of arguments for --add-issue.\n")
 
             # Ensure project key is available before proceeding
             if project_key:
-                self.add_issue(project_key, issue_title)
+                self.add_issue(project_key, issue_title, issue_type=args.issue_type)
             else:
-                print(args)
                 print("Error: No project key provided,",
                       "and no default project set in configuration.")
         elif args.update_issue:

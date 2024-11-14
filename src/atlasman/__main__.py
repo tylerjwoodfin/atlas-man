@@ -160,6 +160,13 @@ If no project is provided, uses default."
         type=str,
         help="Delete a Jira project by project key"
     )
+    jira_actions.add_argument(
+        "-type",
+        "--issue-type",
+        metavar="ISSUE_TYPE",
+        type=str,
+        help="Specify the issue type for a new Jira issue"
+    )
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -220,7 +227,12 @@ def validate_arguments(args: argparse.Namespace,
             jira_parser.print_help()
             return jira_args, unknown
 
-        jira_commands.handle_jira_commands(jira_args)
+        try:
+            jira_commands.handle_jira_commands(jira_args)
+        except TypeError as e:
+            print(f"Error: {str(e)}")
+            jira_parser.print_help()
+            return jira_args, []
         return jira_args, []
 
     elif args.config:
@@ -276,7 +288,7 @@ def main() -> None:
     except Exception as e: # pylint: disable=broad-except
         print(f"An unexpected error occurred: {str(e)}")
     except KeyboardInterrupt:
-        print("\nOperation cancelled by the user.")
+        print("\n\nCanceled.")
 
 if __name__ == "__main__":
     main()

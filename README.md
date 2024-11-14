@@ -24,7 +24,9 @@ This project is in very early, but very active stages of development.
   - ✅ List projects
   - Add issue (default: task)
     - ✅ Add task (default option)
-    - options for issue type, priority, etc.
+    - ✅ options for issue type
+    - ✅ iterate through mandatory fields
+    - add optional parameters for other fields
   - ✅ Add project
   - Update issue
   - Update project
