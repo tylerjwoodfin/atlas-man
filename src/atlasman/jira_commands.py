@@ -281,7 +281,6 @@ class JiraCommands:
             # Process each error field using _prompt_for_field
             for field, message in errors.items():
                 _prompt_for_field(field, message)
-
         try:
             new_issue = self.client.create_issue(fields=fields)
             print(f"{issue_type} '{new_issue.key}' created successfully in '{project_key}'.")

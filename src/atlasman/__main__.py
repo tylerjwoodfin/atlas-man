@@ -3,10 +3,12 @@ Atlas-Man CLI - A Command Line Interface to manage Trello and Jira projects.
 """
 
 import argparse
+import traceback
 from typing import Tuple, List
 from atlasman.config import edit_config, load_config
 from atlasman.trello_commands import TrelloCommands
 from atlasman.jira_commands import JiraCommands
+from atlasman.confluence_commands import ConfluenceCommands
 
 def add_trello_arguments(parser: argparse.ArgumentParser) -> None:
     """
@@ -168,6 +170,56 @@ If no project is provided, uses default."
         help="Specify the issue type for a new Jira issue"
     )
 
+def add_confluence_arguments(parser: argparse.ArgumentParser) -> None:
+    """
+    Add arguments specific to Confluence commands.
+
+    Args:
+        parser (argparse.ArgumentParser):
+            The argument parser to which Confluence arguments will be added.
+    """
+    parser.add_argument(
+        "--confluence",
+        "--c",
+        help="Use Confluence commands",
+        action="store_true"
+    )
+
+    # Confluence actions
+    confluence_actions = parser.add_argument_group('Confluence Actions')
+    confluence_actions.add_argument(
+        "--pages",
+        metavar="SPACE_KEY",
+        nargs="?",
+        type=str,
+        const="default",
+        help="List all Confluence pages in a space. \
+If no space key is provided, uses default."
+    )
+    confluence_actions.add_argument(
+        "--page",
+        metavar="PAGE_ID",
+        type=str,
+        help="Retrieve a Confluence page by its ID"
+    )
+    confluence_actions.add_argument(
+        "--edit-page",
+        metavar="PAGE_ID",
+        type=str,
+        help="Edit a Confluence page by its ID"
+    )
+    confluence_actions.add_argument(
+        "--add-page",
+        metavar=("SPACE_KEY", "TITLE", "CONTENT"),
+        nargs=3,
+        help="Create a new Confluence page in a specified space with a title and content"
+    )
+    confluence_actions.add_argument(
+        "--delete-page",
+        metavar="PAGE_ID",
+        type=str,
+        help="Delete a Confluence page by its ID"
+    )
 
 def parse_arguments() -> argparse.Namespace:
     """
@@ -178,22 +230,31 @@ def parse_arguments() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(description="A CLI to manage Trello and Jira projects")
 
-    # Add Trello and Jira arguments
+    # Add service-specific arguments
     add_trello_arguments(parser)
     add_jira_arguments(parser)
+    add_confluence_arguments(parser)
 
     return parser.parse_args()
 
 def validate_arguments(args: argparse.Namespace,
-                    remaining_args: List[str],
-                    trello_commands: TrelloCommands,
-                    jira_commands: JiraCommands) -> Tuple[argparse.Namespace, List[str]]:
+                       remaining_args: List[str],
+                       trello_commands: TrelloCommands,
+                       jira_commands: JiraCommands,
+                       confluence_commands: ConfluenceCommands) -> \
+                           Tuple[argparse.Namespace, List[str]]:
     """
-    Validate arguments based on Trello or Jira context and return parsed arguments and any unknowns.
+    Validate arguments based on Trello, Jira, or Confluence 
+    context and return parsed arguments and any unknowns.
 
     Args:
         args (argparse.Namespace): Parsed arguments from the initial context check.
         remaining_args (List[str]): Remaining arguments to be parsed in context.
+        trello_commands (TrelloCommands): Instance of TrelloCommands
+            to handle Trello-specific actions.
+        jira_commands (JiraCommands): Instance of JiraCommands to handle Jira-specific actions.
+        confluence_commands (ConfluenceCommands): Instance of
+            ConfluenceCommands to handle Confluence-specific actions.
 
     Returns:
         Tuple[argparse.Namespace, List[str]]:
@@ -220,7 +281,13 @@ def validate_arguments(args: argparse.Namespace,
         # Parse Jira-specific commands
         jira_parser = argparse.ArgumentParser(description="Jira-specific commands")
         add_jira_arguments(jira_parser)
-        jira_args, unknown = jira_parser.parse_known_args(remaining_args)
+
+        try:
+            jira_args, unknown = jira_parser.parse_known_args(remaining_args)
+        except argparse.ArgumentError as e:
+            print(f"Error: {str(e)}")
+            jira_parser.print_help()
+            return args, []
 
         if unknown:
             print(f"Error: Unrecognized arguments for Jira: {' '.join(unknown)}")
@@ -235,14 +302,37 @@ def validate_arguments(args: argparse.Namespace,
             return jira_args, []
         return jira_args, []
 
+    elif args.confluence:
+        # Parse Confluence-specific commands
+        confluence_parser = argparse.ArgumentParser(description="Confluence-specific commands")
+        add_confluence_arguments(confluence_parser)
+        try:
+            confluence_args, unknown = confluence_parser.parse_known_args(remaining_args)
+        except argparse.ArgumentError as e:
+            print(f"Error: {str(e)}")
+            confluence_parser.print_help()
+            return args, []
+
+        if unknown:
+            print(f"Error: Unrecognized arguments for Confluence: {' '.join(unknown)}")
+            confluence_parser.print_help()
+            return confluence_args, unknown
+
+        try:
+            confluence_commands.handle_confluence_commands(confluence_args)
+        except TypeError as e:
+            print(f"Error: {str(e)}")
+            confluence_parser.print_help()
+            return confluence_args, []
+        return confluence_args, unknown
     elif args.config:
         # Edit the configuration file in the default editor
         edit_config()
-
         return args, remaining_args
 
     else:
-        print("Error: No valid command context provided.")
+        print("Error: No context (Trello, Jira, Confluence) specified.",
+              " Use --trello, --jira, or --confluence.")
         return args, remaining_args
 
 def main() -> None:
@@ -254,6 +344,8 @@ def main() -> None:
         parser = argparse.ArgumentParser(description="A CLI to manage Trello and Jira projects")
         parser.add_argument("--trello", "--t", help="Use Trello commands", action="store_true")
         parser.add_argument("--jira", "--j", help="Use Jira commands", action="store_true")
+        parser.add_argument("--confluence", "--c", help="Use Confluence commands",
+                            action="store_true")
         parser.add_argument("--config", help="Edit the configuration file", action="store_true")
 
         # Parse initial command context
@@ -271,9 +363,13 @@ def main() -> None:
         # Initialize TrelloCommands and JiraCommands
         trello_commands = TrelloCommands(config)
         jira_commands = JiraCommands(config)
+        confluence_commands = ConfluenceCommands(config)
 
         # Validate arguments based on context and handle commands
-        validated_args = validate_arguments(args, remaining_args, trello_commands, jira_commands)
+        validated_args = validate_arguments(args, remaining_args,
+                                            trello_commands,
+                                            jira_commands,
+                                            confluence_commands)
 
         if not validated_args:
             parser.print_help()
@@ -284,9 +380,12 @@ def main() -> None:
             print("Please check the Trello-specific syntax in README.md.\n")
         elif args.jira:
             print("Please check the Jira-specific syntax in README.md.\n")
+        elif args.confluence:
+            print("Please check the Confluence-specific syntax in README.md.\n")
         parser.print_help()
     except Exception as e: # pylint: disable=broad-except
         print(f"An unexpected error occurred: {str(e)}")
+        traceback.print_exc()
     except KeyboardInterrupt:
         print("\n\nCanceled.")
 

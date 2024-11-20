@@ -17,6 +17,7 @@ This project is in very early, but very active stages of development.
   - ✅ Delete board
   - ✅ Delete list
   - ✅ Delete card
+  - TUI
 - Jira:
   - List issues
     - ✅ all issues
@@ -44,9 +45,16 @@ This project is in very early, but very active stages of development.
   - `default_tool` support from config file
   - `output_format` support from config file
   - Export to CSV
+- Confluence:
+  - ✅ List pages in a space
+  - Add page to a space
+  - Update page in a space
+  - Delete page in a space
+  - TUI
 - Future:
-  - Confluence integration
   - Bitbucket integration
+  - More Confluence features
+  - Other Atlassian products?
 
 ## Overview
 `atlas-man` is a command-line interface (CLI) tool for managing tasks and projects in Trello and Jira. It allows you to interact with both platforms directly from your terminal, enabling streamlined project management without needing to open a web browser.
@@ -147,6 +155,21 @@ export TRELLO_API_SECRET=<your API secret>
     },
 }
 ```
+
+### Confluence Configuration
+
+- Authenticated with Jira
+- Add these fields to the `config.json` file:
+```json
+{
+  "confluence": {
+        "default_space_key": "",
+    },
+}
+```
+
+- `default_space_key` is the key for the space you want to use by default.
+  - for example, https://yourdomain.atlassian.net/wiki/spaces/SPACEKEY/pages/123456789/Page-Title
 
 ## Usage
 Run the CLI by executing the `main` script with the appropriate commands for Trello or Jira. You can access detailed help with the `--help` flag.
