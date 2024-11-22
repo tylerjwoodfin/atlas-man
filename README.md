@@ -137,6 +137,7 @@ export TRELLO_API_SECRET=<your API secret>
         "base_url": "https://yourdomain.atlassian.net",
         "username": "",
         "default_project_key": "",
+        "default_issue_type": "Task",
         "show_done_issues": False,
         "custom_status_order": { // optional
             "To Do": 1,

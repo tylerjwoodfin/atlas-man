@@ -37,6 +37,7 @@ DEFAULT_CONFIG = {
         "base_url": "https://yourdomain.atlassian.net",
         "username": "",
         "default_project_key": "",
+        "default_issue_type": "",
         "show_done_issues": False,
         "custom_status_order": {
             "To Do": 1,
