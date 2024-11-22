@@ -217,7 +217,7 @@ class JiraCommands:
         """
 
         # Capitalize Issue Type
-        default_issue_type: str = self.config["jira"].get("default_issue_types")
+        default_issue_type: str = self.config["jira"].get("default_issue_type")
         if issue_type:
             issue_type = issue_type.lower().capitalize()
         elif default_issue_type:
