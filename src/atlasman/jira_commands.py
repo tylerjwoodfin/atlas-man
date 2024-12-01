@@ -430,7 +430,7 @@ class JiraCommands:
 
             # Ensure project key is available before proceeding
             if project_key:
-                self.add_issue(project_key, issue_title, issue_type=args.issue_type)
+                self.add_issue(project_key, issue_title, issue_type=args.type)
             else:
                 print("Error: No project key provided,",
                       "and no default project set in configuration.")
