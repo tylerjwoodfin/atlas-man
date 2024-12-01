@@ -217,9 +217,8 @@ python atlas-man.py --help
 #### Add Commands
 - **Add a new Jira issue to a project**:
   ```bash
-  python atlas-man.py --jira --add-issue "Project Key" "Issue Title"
+  python atlas-man.py --jira --add-issue "Project Key" "Issue Title" --type "<Issue Type, optional>"
   ```
-  Currently, the issue type is hardcoded to "Task" and the priority is hardcoded to "Medium". Future versions will allow you to specify these values.
 
 - **Add a new Jira project**:
   ```bash

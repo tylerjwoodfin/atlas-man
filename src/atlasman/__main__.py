@@ -161,7 +161,7 @@ If no project is provided, uses default."
         help="Delete a Jira project by project key"
     )
     jira_actions.add_argument(
-        "-type",
+        "--type",
         "--issue-type",
         metavar="ISSUE_TYPE",
         type=str,
@@ -287,6 +287,7 @@ def main() -> None:
         parser.print_help()
     except Exception as e: # pylint: disable=broad-except
         print(f"An unexpected error occurred: {str(e)}")
+        raise
     except KeyboardInterrupt:
         print("\n\nCanceled.")
 
