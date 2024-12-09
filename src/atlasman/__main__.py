@@ -203,24 +203,37 @@ def validate_arguments(args: argparse.Namespace,
         # Parse Trello-specific commands
         trello_parser = argparse.ArgumentParser(description="Trello-specific commands")
         add_trello_arguments(trello_parser)
-        try:
-            trello_args, unknown = trello_parser.parse_known_args(remaining_args)
-        except argparse.ArgumentError as e:
-            print(f"Error: {str(e)}")
+        trello_args, unknown = trello_parser.parse_known_args(remaining_args)
+
+        # handle empty arguments
+        if all(not value for value in vars(trello_args).values()):
+            print("Remaining args before parsing:", remaining_args)
             trello_parser.print_help()
-            return args, []
+            return trello_args, unknown
 
         if unknown:
-            print(f"Warning: Unrecognized arguments for Trello: {' '.join(unknown)}")
+            print(f"Error: Unrecognized arguments for Trello: {' '.join(unknown)}")
+            trello_parser.print_help()
+            return trello_args, unknown
 
-        trello_commands.handle_trello_commands(trello_args)
-        return trello_args, unknown
+        try:
+            trello_commands.handle_trello_commands(trello_args)
+        except TypeError as e:
+            print(f"Error: {str(e)}")
+            trello_parser.print_help()
+            return trello_args, []
+        return trello_args, []
 
     elif args.jira:
         # Parse Jira-specific commands
         jira_parser = argparse.ArgumentParser(description="Jira-specific commands")
         add_jira_arguments(jira_parser)
         jira_args, unknown = jira_parser.parse_known_args(remaining_args)
+
+        # handle empty arguments
+        if all(not value for value in vars(jira_args).values()):
+            jira_parser.print_help()
+            return jira_args, unknown
 
         if unknown:
             print(f"Error: Unrecognized arguments for Jira: {' '.join(unknown)}")
@@ -242,8 +255,9 @@ def validate_arguments(args: argparse.Namespace,
         return args, remaining_args
 
     else:
-        print("Error: No valid command context provided.")
-        return args, remaining_args
+        # print help if no context is provided
+        raise argparse.ArgumentError(argument=None,
+                                     message="No arguments provided.")
 
 def main() -> None:
     """
