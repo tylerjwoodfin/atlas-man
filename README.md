@@ -78,7 +78,7 @@ pip install -r requirements.md
 ```
 
 ## Configuration
-Before using `atlas-man`, you need to populate the `config.json` file with your Trello and Jira API keys.
+Before using `atlas-man`, you need to populate `~/.config/atlas-man/config.json` file with your Trello and Jira API keys.
 
 ### Trello Configuration
 - Visit the [Trello Power-Ups Admin](https://trello.com/power-ups/admin/) page and create a new Power-Up.
@@ -93,14 +93,17 @@ Name: <your name>
 ```
 
 - Once the Power-Up is created, go to the API Keys tab and `Generate a new API Key`.
-- Copy the API Key and secret, then paste it into the `config.json` file under the `trello` section.
+- Copy the API Key and secret, then paste it into `~/.config/atlas-man/config.json` under the `trello` section.
 - Run
 ```
 export TRELLO_API_KEY=<your API key>
 export TRELLO_API_SECRET=<your API secret>
 ```
-- Run `python3 -m trello oauth`. Visit the link and enter the verification code to generate an OAuth token and token secret.
-- Copy the token and paste it into the `config.json` file under the `trello` section.
+- Visit [https://trello.com/1/authorize?expiration=never&scope=read,write&response_type=token&key=<YOUR_API_KEY>](https://trello.com/1/authorize?expiration=never&scope=read,write&response_type=token&key=<YOUR_API_KEY>).
+  - Click `Allow`.
+  - You will be redirected to a page with a token.
+  - Copy the token from the URL into `oauth_token` in `~/.config/atlas-man/config.json`.
+- Copy the token and paste it into `~/.config/atlas-man/config.json` under the `trello` section.
 - Your config.json should look something like this:
 ```json
 {
@@ -108,7 +111,6 @@ export TRELLO_API_SECRET=<your API secret>
     "api_key": "<your API key>",
     "api_secret": "<your API secret>",
     "oauth_token": "<your OAuth token>",
-    "oauth_token_secret": "<your OAuth token secret>",
     "alias_ids": { // optional
         "shopping": {
           "board_id": "",
@@ -127,8 +129,8 @@ export TRELLO_API_SECRET=<your API secret>
 ### Jira Configuration
 
 - Visit the [Jira API Tokens](https://id.atlassian.com/manage-profile/security/api-tokens) page and create a new API token.
-- Copy the token and paste it into the `config.json` file under the `jira` section.
-- Fill out other fields in the `config.json` file as needed.
+- Copy the token and paste it into `~/.config/atlas-man/config.json` under the `jira` section.
+- Fill out other fields in `~/.config/atlas-man/config.json` as needed.
 - Your config.json should look like this:
 ```json
 {
@@ -206,8 +208,8 @@ python atlas-man.py --help
   python atlas-man.py --jira --issues
   ```
   - By default, this lists all issues not in the "Done" status.
-    - Configure this under `jira` -> `show_done_issues` in the `config.json` file.
-  - You can also configure the sort order under `jira` -> `custom_status_order` in the `config.json` file. See the example above. Add more statuses as needed.
+    - Configure this under `jira` -> `show_done_issues` in `~/.config/atlas-man/config.json`.
+  - You can also configure the sort order under `jira` -> `custom_status_order` in `~/.config/atlas-man/config.json`. See the example above. Add more statuses as needed.
 
 - **List all Jira projects**:
   ```bash

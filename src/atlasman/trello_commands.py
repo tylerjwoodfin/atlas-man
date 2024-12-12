@@ -59,7 +59,6 @@ class TrelloCommands:
         api_key = config_trello.get("api_key")
         api_secret = config_trello.get("api_secret")
         oauth_token = config_trello.get("oauth_token")
-        oauth_token_secret = config_trello.get("oauth_token_secret")
 
         # Validate presence of necessary credentials
         if not api_key:
@@ -72,8 +71,7 @@ class TrelloCommands:
         # Initialize Trello client with available credentials
         return TrelloClient(api_key=api_key,
                             api_secret=api_secret,
-                            token=oauth_token,
-                            token_secret=oauth_token_secret)
+                            token=oauth_token)
 
     @handle_trello_exceptions
     def list_boards(self) -> None:

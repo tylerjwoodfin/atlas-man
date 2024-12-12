@@ -20,7 +20,6 @@ DEFAULT_CONFIG = {
         "api_key": "",
         "api_secret": "",
         "oauth_token": "",
-        "oauth_token_secret": "",
         "alias_ids": {
             "shopping": {
                 "board_id": "",
