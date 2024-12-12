@@ -58,24 +58,22 @@ This project is in very early, but very active stages of development.
 - Context-aware argument validation, ensuring commands are accurately targeted to Trello or Jira.
 
 ## Installation
-Clone the repository and navigate to the project directory:
 ```bash
-git clone https://github.com/tylerjwoodfin/atlas-man.git
-cd atlas-man
+pip install atlasman
 ```
 
-### Setting up the Environment
-It’s recommended to use a virtual environment:
+or
+
 ```bash
-python3 -m venv env
-source env/bin/activate
+curl -s https://api.github.com/repos/tylerjwoodfin/atlas-man/releases/latest \
+| grep "browser_download_url" \
+| cut -d '"' -f 4 \
+| xargs curl -L -o atlas-man.pex
+
+sudo mv atlas-man.pex /usr/local/bin/
 ```
 
-### Installing Dependencies
-`atlas-man` requires some Python dependencies. Install them with:
-```bash
-pip install -r requirements.md
-```
+Dependencies in `requirements.md` are installed automatically.
 
 ## Configuration
 Before using `atlas-man`, you need to populate `~/.config/atlas-man/config.json` file with your Trello and Jira API keys.
@@ -95,7 +93,7 @@ Name: <your name>
 - Once the Power-Up is created, go to the API Keys tab and `Generate a new API Key`.
 - Copy the API Key and secret, then paste it into `~/.config/atlas-man/config.json` under the `trello` section.
 - Run
-```
+```bash
 export TRELLO_API_KEY=<your API key>
 export TRELLO_API_SECRET=<your API secret>
 ```
@@ -155,57 +153,57 @@ export TRELLO_API_SECRET=<your API secret>
 Run the CLI by executing the `main` script with the appropriate commands for Trello or Jira. You can access detailed help with the `--help` flag.
 
 ```bash
-python atlas-man.py --help
+atlasman --help
 ```
 
 ### Trello Commands
 #### Listing Commands
 - **List all Trello boards**:
   ```bash
-  python atlas-man.py --trello --boards
+  atlasman --trello --boards
   ```
 - **List all Trello lists**:
   ```bash
-  python atlas-man.py --trello --lists
+  atlasman --trello --lists
   ```
 - **List all Trello cards**:
   ```bash
-  python atlas-man.py --trello --cards
+  atlasman --trello --cards
   ```
 
 #### Add Commands
 - **Add a new Trello board**:
   ```bash
-  python atlas-man.py --trello --add-board "Board Name"
+  atlasman --trello --add-board "Board Name"
   ```
 - **Add a new Trello list to an existing board**:
   ```bash
-  python atlas-man.py --trello --add-list "Board ID" "List ID"
+  atlasman --trello --add-list "Board ID" "List ID"
   ```
 - **Add a new Trello card to an existing list**:
   ```bash
-  python atlas-man.py --trello --add-card "List ID" "Card Title"
+  atlasman --trello --add-card "List ID" "Card Title"
   ```
 
 #### Delete Commands
 - **Delete a Trello board**:
   ```bash
-  python atlas-man.py --trello --delete-board "Board ID"
+  atlasman --trello --delete-board "Board ID"
   ```
 - **Delete a Trello list from a board**:
   ```bash
-  python atlas-man.py --trello --delete-list "List ID"
+  atlasman --trello --delete-list "List ID"
   ```
 - **Delete a Trello card from a list**:
   ```bash
-  python atlas-man.py --trello --delete-card "Card ID"
+  atlasman --trello --delete-card "Card ID"
   ```
 
 ### Jira Commands
 #### Listing Commands
 - **List all Jira issues**:
   ```bash
-  python atlas-man.py --jira --issues
+  atlasman --jira --issues
   ```
   - By default, this lists all issues not in the "Done" status.
     - Configure this under `jira` -> `show_done_issues` in `~/.config/atlas-man/config.json`.
@@ -213,34 +211,34 @@ python atlas-man.py --help
 
 - **List all Jira projects**:
   ```bash
-  python atlas-man.py --jira --projects
+  atlasman --jira --projects
   ```
 
 #### Add Commands
 - **Add a new Jira issue to a project**:
   ```bash
-  python atlas-man.py --jira --add-issue "Project Key" "Issue Title" --type "<Issue Type, optional>"
+  atlasman --jira --add-issue "Project Key" "Issue Title" --type "<Issue Type, optional>"
   ```
 
 - **Add a new Jira project**:
   ```bash
-  python atlas-man.py --jira --add-project "Project Name"
+  atlasman --jira --add-project "Project Name"
   ```
 
 #### Update Commands
 - **Update an existing Jira issue's title**:
   ```bash
-  python atlas-man.py --jira --update-issue "Issue ID" "New Title"
+  atlasman --jira --update-issue "Issue ID" "New Title"
   ```
 
 #### Delete Commands
 - **Delete a Jira issue**:
   ```bash
-  python atlas-man.py --jira --delete-issue "Issue ID"
+  atlasman --jira --delete-issue "Issue ID"
   ```
 - **Delete a Jira project**:
   ```bash
-  python atlas-man.py --jira --delete-project "Project Key"
+  atlasman --jira --delete-project "Project Key"
   ```
 
 ## Example Usages
@@ -248,16 +246,16 @@ Here are a few example commands you can try:
 
 ```bash
 # List all Trello boards
-python atlas-man.py --trello --boards
+atlasman --trello --boards
 
 # Add a new list to the "Development" board
-python atlas-man.py --trello --add-list "Development" "Backlog"
+atlasman --trello --add-list "Development" "Backlog"
 
 # List all issues in Jira
-python atlas-man.py --jira --issues
+atlasman --jira --issues
 
 # Add a new issue to the "WEB" project in Jira
-python atlas-man.py --jira --add-issue "WEB" "Fix homepage bug"
+atlasman --jira --add-issue "WEB" "Fix homepage bug"
 ```
 
 ## Contributing
