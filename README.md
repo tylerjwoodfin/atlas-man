@@ -59,7 +59,7 @@ This project is in very early, but very active stages of development.
 
 ## Installation
 ```bash
-pip install atlasman
+pip install atlas-man
 ```
 
 or
