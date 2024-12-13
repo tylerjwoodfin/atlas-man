@@ -219,6 +219,9 @@ in board '{board.name}' with ID: {new_list.id}")
             print(f"No list found with the ID or alias '{list_name_or_alias}'.")
             return
 
+        while not card_name:
+            card_name = input("Enter card name:\n")
+
         # Add the card to the specified list
         list_obj.add_card(card_name, desc=description)
         print(f"Card '{card_name}' added to list '{list_obj.name}'.")
