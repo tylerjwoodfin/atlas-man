@@ -274,7 +274,10 @@ class JiraCommands:
                             value = {"id": input("\n")}
                 else:
                     # Default case for str or any unexpected type
-                    value = input(f"Enter {message.replace(' is required.', '')}: ")
+                    remove_chars = [' is required.', 'You must specify ', '.']
+                    for char in remove_chars:
+                        message = message.replace(char, '')
+                    value = input(f"Enter {message}: ")
 
                 fields[field] = value
 
