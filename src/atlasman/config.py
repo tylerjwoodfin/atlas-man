@@ -45,6 +45,9 @@ DEFAULT_CONFIG = {
             "Done": 4
         }
     },
+    "confluence": {
+        "default_space_key": "",
+    },
     "cli": {
         "verbose": False,
         "default_tool": "trello",
