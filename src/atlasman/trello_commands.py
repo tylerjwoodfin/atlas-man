@@ -31,7 +31,7 @@ def handle_trello_exceptions(func):
 
 class TrelloCommands:
     """
-    Handles Trello-specific commands.
+    The TrelloCommands class provides functions to interact with the Trello API.
     """
 
     def __init__(self, config_data: Dict[str, Any]) -> None:
