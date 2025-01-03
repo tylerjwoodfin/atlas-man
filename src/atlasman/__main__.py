@@ -163,7 +163,7 @@ If no project is provided, uses default."
         help="Delete a Jira project by project key"
     )
     jira_actions.add_argument(
-        "-type",
+        "--type",
         "--issue-type",
         metavar="ISSUE_TYPE",
         type=str,
@@ -264,18 +264,26 @@ def validate_arguments(args: argparse.Namespace,
         # Parse Trello-specific commands
         trello_parser = argparse.ArgumentParser(description="Trello-specific commands")
         add_trello_arguments(trello_parser)
-        try:
-            trello_args, unknown = trello_parser.parse_known_args(remaining_args)
-        except argparse.ArgumentError as e:
-            print(f"Error: {str(e)}")
+        trello_args, unknown = trello_parser.parse_known_args(remaining_args)
+
+        # handle empty arguments
+        if all(not value for value in vars(trello_args).values()):
+            print("Remaining args before parsing:", remaining_args)
             trello_parser.print_help()
-            return args, []
+            return trello_args, unknown
 
         if unknown:
-            print(f"Warning: Unrecognized arguments for Trello: {' '.join(unknown)}")
+            print(f"Error: Unrecognized arguments for Trello: {' '.join(unknown)}")
+            trello_parser.print_help()
+            return trello_args, unknown
 
-        trello_commands.handle_trello_commands(trello_args)
-        return trello_args, unknown
+        try:
+            trello_commands.handle_trello_commands(trello_args)
+        except TypeError as e:
+            print(f"Error: {str(e)}")
+            trello_parser.print_help()
+            return trello_args, []
+        return trello_args, []
 
     elif args.jira:
         # Parse Jira-specific commands
@@ -288,6 +296,11 @@ def validate_arguments(args: argparse.Namespace,
             print(f"Error: {str(e)}")
             jira_parser.print_help()
             return args, []
+
+        # handle empty arguments
+        if all(not value for value in vars(jira_args).values()):
+            jira_parser.print_help()
+            return jira_args, unknown
 
         if unknown:
             print(f"Error: Unrecognized arguments for Jira: {' '.join(unknown)}")
@@ -333,7 +346,9 @@ def validate_arguments(args: argparse.Namespace,
     else:
         print("Error: No context (Trello, Jira, Confluence) specified.",
               " Use --trello, --jira, or --confluence.")
-        return args, remaining_args
+        # print help if no context is provided
+        raise argparse.ArgumentError(argument=None,
+                                     message="No arguments provided.")
 
 def main() -> None:
     """
@@ -386,6 +401,7 @@ def main() -> None:
     except Exception as e: # pylint: disable=broad-except
         print(f"An unexpected error occurred: {str(e)}")
         traceback.print_exc()
+        raise
     except KeyboardInterrupt:
         print("\n\nCanceled.")
 

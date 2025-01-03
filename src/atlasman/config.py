@@ -20,7 +20,6 @@ DEFAULT_CONFIG = {
         "api_key": "",
         "api_secret": "",
         "oauth_token": "",
-        "oauth_token_secret": "",
         "alias_ids": {
             "shopping": {
                 "board_id": "",
@@ -37,6 +36,7 @@ DEFAULT_CONFIG = {
         "base_url": "https://yourdomain.atlassian.net",
         "username": "",
         "default_project_key": "",
+        "default_issue_type": "",
         "show_done_issues": False,
         "custom_status_order": {
             "To Do": 1,

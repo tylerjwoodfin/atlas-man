@@ -217,7 +217,7 @@ class JiraCommands:
         """
 
         # Capitalize Issue Type
-        default_issue_type: str = self.config["jira"].get("default_issue_types")
+        default_issue_type: str = self.config["jira"].get("default_issue_type")
         if issue_type:
             issue_type = issue_type.lower().capitalize()
         elif default_issue_type:
@@ -274,7 +274,10 @@ class JiraCommands:
                             value = {"id": input("\n")}
                 else:
                     # Default case for str or any unexpected type
-                    value = input(f"Enter {message.replace(' is required.', '')}: ")
+                    remove_chars = [' is required.', 'You must specify ', '.']
+                    for char in remove_chars:
+                        message = message.replace(char, '')
+                    value = input(f"Enter {message}: ")
 
                 fields[field] = value
 
@@ -429,7 +432,7 @@ class JiraCommands:
 
             # Ensure project key is available before proceeding
             if project_key:
-                self.add_issue(project_key, issue_title, issue_type=args.issue_type)
+                self.add_issue(project_key, issue_title, issue_type=args.type)
             else:
                 print("Error: No project key provided,",
                       "and no default project set in configuration.")

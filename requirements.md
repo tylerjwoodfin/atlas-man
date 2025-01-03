@@ -3,6 +3,6 @@ python_dateutil
 pytz
 requests
 prompt_toolkit
-trello
+py-trello
 jira
 tabulate
