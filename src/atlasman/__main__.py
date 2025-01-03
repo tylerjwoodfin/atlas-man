@@ -197,6 +197,11 @@ def add_confluence_arguments(parser: argparse.ArgumentParser) -> None:
 If no space key is provided, uses default."
     )
     confluence_actions.add_argument(
+        "--spaces",
+        action="store_true",
+        help="List all Confluence spaces"
+    )
+    confluence_actions.add_argument(
         "--page",
         metavar="PAGE_ID",
         type=str,

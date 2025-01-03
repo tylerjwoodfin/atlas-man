@@ -10,6 +10,7 @@ import tempfile
 import traceback
 from typing import Any, Dict
 from jira import JIRAError
+from bs4 import BeautifulSoup
 import requests
 
 # Decorator to handle common Jira-related exceptions
@@ -24,6 +25,8 @@ def handle_confluence_exceptions(func):
             print(f"JIRA error: {e}")
         except ValueError as e:
             print(f"Value error: {e}")
+        except requests.exceptions.HTTPError as e:
+            print(e)
         except Exception as e:  # pylint: disable=broad-except
             print(f"Unexpected error in {func.__qualname__}: {e}")
             traceback.print_exc()
@@ -87,21 +90,50 @@ class ConfluenceCommands:
             space_key = self.default_space_key
 
         pages = self.request("GET", f"content?spaceKey={space_key}&type=page")
+
+        if not pages:
+            print("No pages found.")
+            return
+
         for page in pages.get("results", []):
             print(f"Page Title: {page['title']} - Page ID: {page['id']}")
 
     @handle_confluence_exceptions
-    def get_page(self, page_id: str) -> Dict[str, Any]:
+    def list_spaces(self) -> None:
         """
-        Retrieves a Confluence page by its ID.
+        Retrieves a list of available Confluence spaces.
+
+        Returns:
+            List[Dict[str, Any]]: A list of dictionaries representing the spaces.
+        """
+        spaces = self.request("GET", "space")
+
+        for space in spaces.get("results", []):
+            print(f"Space Name: {space['name']} - Space Key: {space['key']}")
+
+    @handle_confluence_exceptions
+    def get_page(self, page_id: str) -> None:
+        """
+        Retrieves and prints a Confluence page by its ID as plain text with line breaks.
+        
+        Displays the page title, version, and content as plain text.
 
         Args:
             page_id (str): The ID of the page to retrieve.
-
-        Returns:
-            Dict[str, Any]: The page content and metadata.
         """
-        return self.request("GET", f"content/{page_id}?expand=body.storage,version")
+        page = self.request("GET", f"content/{page_id}?expand=body.storage,version")
+        title = page.get("title", "No Title")
+        version = page.get("version", {}).get("number", "Unknown Version")
+        raw_html = page.get("body", {}).get("storage", {}).get("value", "")
+
+        # Parse the raw HTML content using BeautifulSoup
+        soup = BeautifulSoup(raw_html, 'html.parser')
+        plain_text = soup.get_text(separator="\n")  # Extract text with line breaks
+
+        print(f"Page Title: {title}")
+        print(f"Version: {version}")
+        print("Content:")
+        print(plain_text)
 
     @handle_confluence_exceptions
     def edit_page(self, page_id: str) -> None:
@@ -201,6 +233,8 @@ class ConfluenceCommands:
             if args.pages == "default":
                 default_space_key = self.config["confluence"].get("default_space_key")
             self.list_pages(default_space_key)
+        elif args.spaces:
+            self.list_spaces()
         elif args.page:
             if args.page:
                 self.get_page(args.page)

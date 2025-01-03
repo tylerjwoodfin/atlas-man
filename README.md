@@ -48,6 +48,7 @@ This project is in very early, but very active stages of development.
 - Confluence:
   - ✅ List pages in a space
   - Add page to a space
+  - ✅ View page in a space
   - Update page in a space
   - Delete page in a space
   - TUI
